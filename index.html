@@ -51,7 +51,7 @@
         themeTitle.classList.add("themeTitle")
 
         // Nous affichons le nom du thème dans un élément HTML
-        themeTitle.innerText = theme.Libel;
+        themeTitle.innerText = theme.libel;
 
         // Nous créons un bouton pour lancer le quiz
         themeButton.innerText = "Démarer"
@@ -95,8 +95,6 @@
             button.addEventListener("click", async (ev) => {
                 const nbrQuestions = parseInt(input.value); // Récupère le nombre de questions à afficher depuis un champ de saisie de l'utilisateur.
                 container.innerHTML = ""; // Supprime tout le contenu précédent de l'interface utilisateur.
-                console.log(theme.id)
-                console.log(nbrQuestions)
                 const response = await fetch("http://localhost:8000/api/theme/"+ theme.id +"/questions/" + nbrQuestions ); // Envoie une requête GET à l'API pour récupérer des questions sur un thème spécifique.
                 console.log(response)
                 const questions = await response.json(); // Récupère les questions sous forme de tableau d'objets JavaScript.
@@ -118,7 +116,7 @@
                 questionsContainer.classList.add("questionsContainer");
                 async function test(number) { // Fonction récursive qui affiche les questions et les réponses une par une.
                     questionsContainer.innerHTML = ""; // Supprime tout le contenu précédent du conteneur de réponses.
-                    title.innerText = number + 1 + " - " + questions[number].intituler // Met à jour le titre de la question.
+                    title.innerText = number + 1 + " - " + questions[number].intitule // Met à jour le titre de la question.
                     questionsReponses.get(questions[number]).forEach(reponse => { // Boucle sur toutes les réponses à la question.
                         const reponseDom = document.createElement("button") // Crée un bouton pour afficher la réponse.
                         reponseDom.innerText = reponse.intituler // Affiche le libellé de la réponse.
@@ -127,27 +125,34 @@
                             if (number + 1 !== nbrQuestions) { // Si ce n'est pas la dernière question, passe à la question suivante.
                                 await test(number + 1);
                             } else { // Sinon, soumet les réponses à l'API pour obtenir un score.
-                                container.innerHTML = ""; // Supprime tout le contenu précédent de l'interface utilisateur.
+                                //container.innerHTML = ""; // Supprime tout le contenu précédent de l'interface utilisateur.
+                                subContainer.innerHTML = "";
                                 const dataAnswers = await fetch(
                                     "http://localhost:8000/api/question/reponses/post",
                                     {method: "POST", body: JSON.stringify(reponses)}
                                 );
 
                                 const json = await dataAnswers.json();
-                                console.log(json)
+
                                 let count = 0;
 
-                                Object.keys(json).forEach(key => {
-                                    const isCorrect = json[key].isCorrect;
-                                    console.log(isCorrect)
-                                    const question = json[key].question;
-                                    console.log(question)
-                                    if (isCorrect === true) {
+                                Object.keys(json).forEach((key) => {
+                                    if (json[key].isCorrect === true) {
                                         count++;
                                     }
 
                                     const p = document.createElement("p");
-                                    p.innerText = `${parseInt(key) + 1} - ${question} ${isCorrect}`;
+                                    p.innerHTML =
+                                        json[key].key +
+                                        1 +
+                                        " - " +
+                                        json[key].question
+
+                                    if (json[key].isCorrect) {
+                                        p.classList.add("correct"); // Ajoute la classe "correct" si la question est vraie
+                                    } else {
+                                        p.classList.add("incorrect"); // Ajoute la classe "incorrect" si la question est fausse
+                                    }
 
                                     subContainer.append(p);
                                 });
@@ -164,7 +169,9 @@
                                 button.classList.add("button");
 
                                 subContainer.append(score, button);
+
                             }
+
                         })
                         questionsContainer.append(reponseDom);
                     })
@@ -174,8 +181,9 @@
                 container.append(subContainer);
             })
         })
-        container.append(themeContainer);
         themeContainer.append(themeTitle, themeButton)
+        container.append(themeContainer);
+
     })
 </script>
 </body>

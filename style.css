@@ -30,6 +30,14 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
+.correct {
+    color: green;
+}
+
+.incorrect {
+    color: red;
+}
+
 .themeButton {
     font-size: 1.3rem;
     background-color: #1f8601;
